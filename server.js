@@ -84,34 +84,72 @@ app.post("/api/contact-enquiries",
         try {
             const { name, email, phone, subject, message } = req.body;
 
+            // Add validation
+            if (!name || !email || !subject || !message) {
+                return res.status(400).json({
+                    success: false,
+                    error: "All required fields must be filled"
+                });
+            }
+
             await db.execute(
                 `INSERT INTO contact_enquiries
-       (name, email, phone, subject, message)
-       VALUES (?, ?, ?, ?, ?)`,
-                [name, email, phone, subject, message]
+                (name, email, phone, subject, message, created_at)
+                VALUES (?, ?, ?, ?, ?, NOW())`,
+                [name, email, phone || null, subject, message]
             );
 
+            console.log("✅ Contact enquiry saved to database");
             res.json({ success: true });
         } catch (err) {
-            console.error("INSERT ERROR:", err); // 👈 ADD THIS
-            res.status(500).json({ success: false });
+            console.error("❌ INSERT ERROR:", err);
+            res.status(500).json({
+                success: false,
+                error: err.message
+            });
         }
     });
 
 
 // GET partner enquiries
-app.get("/api/partnership-enquiries", async (req, res) => {
+// ⚠️ Remove authMiddleware - partnership enquiries should be public
+app.post("/api/partnership-enquiries", async (req, res) => {
+    console.log("PARTNERSHIP REQUEST BODY:", req.body);
+
     try {
-        const [rows] = await db.execute(
-            "SELECT * FROM partner_enquiries ORDER BY id DESC"
+        const {
+            companyName,
+            contactPerson,
+            email,
+            phone,
+            location,
+            businessType,
+            message
+        } = req.body;
+
+        // Validation
+        if (!companyName || !contactPerson || !email || !businessType) {
+            return res.status(400).json({
+                success: false,
+                error: "Required fields: company name, contact person, email, and business type"
+            });
+        }
+
+        await db.execute(
+            `INSERT INTO partner_enquiries 
+                (company_name, contact_person, email, phone, location, business_type, message, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+            [companyName, contactPerson, email, phone || null, location || null, businessType, message || null]
         );
 
-        res.json(rows); // ✅ always array
-    } catch (error) {
-        console.error("GET partner enquiries error:", error);
-
-        // ✅ return EMPTY ARRAY instead of object
-        res.status(200).json([]);
+        console.log("✅ Partnership enquiry saved");
+        res.json({ success: true });
+    } catch (err) {
+        console.error("❌ PARTNERSHIP INSERT ERROR:", err);
+        res.status(500).json({
+            success: false,
+            error: err.message
+        });
     }
 });
 
