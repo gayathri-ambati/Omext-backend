@@ -48,32 +48,19 @@ app.post("/api/admin/login", async (req, res) => {
 });
 
 // Partner enquiry
-app.post("/api/partnership-enquiries",
+app.get("/api/partnership-enquiries", async (req, res) => {
+    try {
+        const [rows] = await db.execute(
+            "SELECT * FROM partner_enquiries ORDER BY id DESC"
+        );
 
-    async (req, res) => {
-        try {
-            const {
-                companyName,
-                contactPerson,
-                email,
-                phone,
-                location,
-                businessType,
-                message,
-            } = req.body;
+        res.json(rows);
+    } catch (error) {
+        console.error("GET partner enquiries error:", error);
+        res.status(200).json([]);
+    }
+});
 
-            await db.execute(
-                `INSERT INTO partner_enquiries
-      (company_name, contact_person, email, phone, location, business_type, message)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                [companyName, contactPerson, email, phone, location, businessType, message]
-            );
-
-            res.json({ success: true });
-        } catch (err) {
-            res.status(500).json({ success: false });
-        }
-    });
 
 // Contact enquiry
 app.post("/api/contact-enquiries",
