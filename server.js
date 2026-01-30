@@ -49,7 +49,7 @@ app.post("/api/admin/login", async (req, res) => {
 
 // Partner enquiry
 app.post("/api/partnership-enquiries",
-    authMiddleware,
+
     async (req, res) => {
         try {
             const {
@@ -77,7 +77,7 @@ app.post("/api/partnership-enquiries",
 
 // Contact enquiry
 app.post("/api/contact-enquiries",
-    authMiddleware,
+
     async (req, res) => {
         console.log("REQUEST BODY:", req.body); // 👈 ADD THIS
 
