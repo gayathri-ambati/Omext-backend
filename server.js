@@ -155,6 +155,53 @@ app.get("/api/contact-enquiries", async (req, res) => {
     }
 });
 
+// UPDATE partner enquiry
+app.put("/api/partnership-enquiries/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            company_name,
+            contact_person,
+            email,
+            phone,
+            location,
+            business_type,
+            message
+        } = req.body;
+
+        await db.execute(
+            `UPDATE partner_enquiries SET
+        company_name = ?,
+        contact_person = ?,
+        email = ?,
+        phone = ?,
+        location = ?,
+        business_type = ?,
+        message = ?
+      WHERE id = ?`,
+            [
+                company_name,
+                contact_person,
+                email,
+                phone || null,
+                location || null,
+                business_type || null,
+                message || null,
+                id
+            ]
+        );
+
+        res.json({
+            success: true,
+            message: "Partner enquiry updated successfully"
+        });
+    } catch (error) {
+        console.error("UPDATE ERROR:", error);
+        res.status(500).json({ success: false });
+    }
+});
+
+
 // DELETE partner enquiry
 app.delete("/api/partnership-enquiries/:id", async (req, res) => {
     try {
@@ -171,6 +218,34 @@ app.delete("/api/partnership-enquiries/:id", async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
+
+
+// UPDATE contact enquiry
+app.put("/api/contact-enquiries/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, email, subject, message } = req.body;
+
+        await db.execute(
+            `UPDATE contact_enquiries SET
+        name = ?,
+        email = ?,
+        subject = ?,
+        message = ?
+      WHERE id = ?`,
+            [name, email, subject, message, id]
+        );
+
+        res.json({
+            success: true,
+            message: "Contact enquiry updated successfully"
+        });
+    } catch (error) {
+        console.error("UPDATE CONTACT ERROR:", error);
+        res.status(500).json({ success: false });
+    }
+});
+
 
 // DELETE contact enquiry
 app.delete("/api/contact-enquiries/:id", async (req, res) => {
